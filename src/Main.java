@@ -1,46 +1,38 @@
 
 public class Main {
+    static int w = 32, r = 20;
+    static int[] S;
+    private static int Pw = 0xb7e15163, Qw = 0x9e3779b9; //magic constant
 
     public static void main(String[] args) {
 
     }
 
-    private int toDigit(char hexChar) {
-        int digit = Character.digit(hexChar, 16);
-        if(digit == -1) {
-            throw new IllegalArgumentException("Invalid Hexadecimal Character: "+ hexChar);
-        }
-        return digit;
+    private static int rotLeft(int val, int pas) {
+        return (val << pas) | (val >>> (32 - pas));
     }
 
-    private byte hexToByte(String hexString) {
-        int firstDigit = toDigit(hexString.charAt(0));
-        int secondDigit = toDigit(hexString.charAt(1));
-        return (byte) ((firstDigit << 4) + secondDigit);
+    private static int rotRight(int val, int pas) {
+        return (val >>> pas) | (val << (32 - pas));
     }
 
-    private String byteToHex(byte num) {
-        char[] hexDigits = new char[2];
-        hexDigits[0] = Character.forDigit((num >> 4) & 0xF, 16);
-        hexDigits[1] = Character.forDigit((num & 0xF), 16);
-        return new String(hexDigits);
-    }
-
-    public String byteArrayToHex(byte[] byteArray) {
-        StringBuilder hexStringBuffer = new StringBuilder();
-        for (byte aByteArray : byteArray) {
-            hexStringBuffer.append(byteToHex(aByteArray));
+    public int[] keySchedule(byte[] key) {
+        int[] S = new int[2 * r + 4];
+        S[0] = Pw;
+        int c = key.length / (w / 8);
+        int[] L = Converting.byteArrayToWords(key, c);
+        for (int i = 1; i < (2 * r + 4); i++) {
+            S[i] = S[i - 1] + Qw;
         }
-        return hexStringBuffer.toString();
-    }
-    public byte[] hexToByteArray(String hexString) {
-        if (hexString.length() % 2 == 1) {
-            throw new IllegalArgumentException("Invalid hexadecimal String supplied.");
+        int A, B, i, j;
+        A = B = i = j = 0;
+        int v = 3 * Math.max(c, (2 * r + 4));
+        for (int s = 0; s < v; s++) {
+            A = S[i] = rotRight((S[i] + A + B), 3);
+            B = L[j] = rotLeft(L[j] + A + B, A + B);
+            i = (i + 1) % (2 * r + 4);
+            j = (j + 1) % c;
         }
-        byte[] bytes = new byte[hexString.length() / 2];
-        for (int i = 0; i < hexString.length(); i += 2) {
-            bytes[i / 2] = hexToByte(hexString.substring(i, i + 2));
-        }
-        return bytes;
+        return S;
     }
 }
