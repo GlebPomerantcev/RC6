@@ -1,9 +1,9 @@
-public class Converting {
+class Converting {
 
     private static int toDigit(char hexChar) {
         int digit = Character.digit(hexChar, 16);
-        if(digit == -1) {
-            throw new IllegalArgumentException("Invalid Hexadecimal Character: "+ hexChar);
+        if (digit == -1) {
+            throw new IllegalArgumentException("Invalid Hexadecimal Character: " + hexChar);
         }
         return digit;
     }
@@ -21,7 +21,7 @@ public class Converting {
         return new String(hexDigits);
     }
 
-    public static String byteArrayToHex(byte[] byteArray) {
+    static String byteArrayToHex(byte[] byteArray) {
         StringBuilder hexStringBuffer = new StringBuilder();
         for (byte aByteArray : byteArray) {
             hexStringBuffer.append(byteToHex(aByteArray));
@@ -29,7 +29,7 @@ public class Converting {
         return hexStringBuffer.toString();
     }
 
-    public static byte[] hexToByteArray(String hexString) {
+    static byte[] hexToByteArray(String hexString) {
         if (hexString.length() % 2 == 1) {
             throw new IllegalArgumentException("Invalid hexadecimal String supplied.");
         }
@@ -40,7 +40,30 @@ public class Converting {
         return bytes;
     }
 
-    public static int[] byteArrayToWords(byte[] key, int c) {
+    static byte[] intArrayToByte(int[] intArray, int length) {
+        byte[] res = new byte[length];
+        for (int i = 0; i < length; i++) {
+            res[i] = (byte) ((intArray[i / 4] >>> (i % 4) * 8) & 0xff);
+        }
+        return res;
+    }
+
+    static int[] byteArrayToInt(byte[] byteArray, int length) {
+        int[] res = new int[length];
+        for (int j = 0; j < res.length; j++) {
+            res[j] = 0;
+        }
+        int counter = 0;
+        for (int i = 0; i < res.length; i++) {
+            res[i] = ((byteArray[counter++] & 0xff)) |
+                    ((byteArray[counter++] & 0xff) << 8) |
+                    ((byteArray[counter++] & 0xff) << 16) |
+                    ((byteArray[counter++] & 0xff) << 24);
+        }
+        return res;
+    }
+
+    static int[] byteArrayToWords(byte[] key, int c) {
         int[] tmp = new int[c];
         for (int i = 0; i < tmp.length; i++)
             tmp[i] = 0;
