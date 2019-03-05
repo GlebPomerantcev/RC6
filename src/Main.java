@@ -13,17 +13,38 @@ public class Main {
             FileWriter output = new FileWriter("output.txt");
             BufferedReader bf = new BufferedReader(input);
 
-            String inputText = bf.readLine().replaceAll(" ", "");
-            String inputKey = bf.readLine().replaceAll(" ", "");
-            byte[] W = Converting.hexToByteArray(inputText);
-            byte[] key = Converting.hexToByteArray(inputKey);
-            S = keySchedule(key);
+            String operationType = bf.readLine();
+            switch (operationType) {
+                case "encryption": {
+                    String inputText = bf.readLine().replaceAll(" ", "");
+                    String inputKey = bf.readLine().replaceAll(" ", "");
+                    byte[] W = Converting.hexToByteArray(inputText);
+                    byte[] key = Converting.hexToByteArray(inputKey);
+                    S = keySchedule(key);
 
-            byte[] resArr = encryption(W);
-            String resString = Converting.byteArrayToHex(resArr).replaceAll("..", "$0 ");
-            output.write("result is: " + resString);
-            output.flush();
+                    byte[] resArr = encryption(W);
+                    String resString = Converting.byteArrayToHex(resArr).replaceAll("..", "$0 ");
+                    output.write("result is: " + resString);
+                    output.flush();
+                    break;
+                }
+                case "decryption": {
+                    String inputText = bf.readLine().replaceAll(" ", "");
+                    String inputKey = bf.readLine().replaceAll(" ", "");
+                    byte[] X = Converting.hexToByteArray(inputText);
+                    byte[] key = Converting.hexToByteArray(inputKey);
+                    S = keySchedule(key);
 
+                    byte[] resArr = decryption(X);
+                    String resString = Converting.byteArrayToHex(resArr).replaceAll("..", "$0 ");
+                    output.write("result is: " + resString);
+                    output.flush();
+                    break;
+                }
+                default:
+                    System.out.println("Wrong operation type");
+                    break;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -71,6 +92,44 @@ public class Main {
         data[3] = D;
 
         res = Converting.intArrayToByte(data, key.length);
+        return res;
+    }
+
+    private static byte[] decryption(byte[] input) {
+        int temp, t, u, lgw = 5;
+        int[] data = new int[input.length / 4];
+        for (int i = 0; i < data.length; i++)
+            data[i] = 0;
+        data = Converting.byteArrayToInt(input, data.length);
+
+        int A = data[0], B = data[1], C = data[2], D = data[3];
+
+        C = C - S[2 * r + 3];
+        A = A - S[2 * r + 2];
+
+        byte[] res;
+        for (int i = r; i >= 1; i--) {
+            temp = D;
+            D = C;
+            C = B;
+            B = A;
+            A = temp;
+
+            u = rotLeft(D * (2 * D + 1), lgw);
+            t = rotLeft(B * (2 * B + 1), lgw);
+            C = rotRight(C - S[2 * i + 1], t) ^ u;
+            A = rotRight(A - S[2 * i], u) ^ t;
+
+        }
+        D = D - S[1];
+        B = B - S[0];
+
+        data[0] = A;
+        data[1] = B;
+        data[2] = C;
+        data[3] = D;
+
+        res = Converting.intArrayToByte(data, input.length);
         return res;
     }
 
