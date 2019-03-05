@@ -132,27 +132,3 @@ public class Main {
         res = Converting.intArrayToByte(data, input.length);
         return res;
     }
-
-    private static int[] keySchedule(byte[] key) {
-        int[] S = new int[2 * r + 4];
-        S[0] = Pw;
-        int c = key.length / (w / 8);
-        int[] L = Converting.byteArrayToWords(key, c);
-
-        for (int i = 1; i < (2 * r + 4); i++) {
-            S[i] = S[i - 1] + Qw;
-        }
-
-        int A, B, i, j;
-        int v = 3 * Math.max(c, (2 * r + 4));
-        A = B = i = j = 0;
-
-        for (int s = 0; s < v; s++) {
-            A = S[i] = rotLeft((S[i] + A + B), 3);
-            B = L[j] = rotLeft(L[j] + A + B, A + B);
-            i = (i + 1) % (2 * r + 4);
-            j = (j + 1) % c;
-        }
-        return S;
-    }
-}
