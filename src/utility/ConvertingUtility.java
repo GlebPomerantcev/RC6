@@ -1,4 +1,6 @@
-class Converting {
+package utility;
+
+public class ConvertingUtility {
 
     private static int toDigit(char hexChar) {
         int digit = Character.digit(hexChar, 16);
@@ -21,7 +23,7 @@ class Converting {
         return new String(hexDigits);
     }
 
-    static String byteArrayToHex(byte[] byteArray) {
+    public static String byteArrayToHex(byte[] byteArray) {
         StringBuilder hexStringBuffer = new StringBuilder();
         for (byte aByteArray : byteArray) {
             hexStringBuffer.append(byteToHex(aByteArray));
@@ -29,7 +31,7 @@ class Converting {
         return hexStringBuffer.toString();
     }
 
-    static byte[] hexToByteArray(String hexString) {
+    public static byte[] hexToByteArray(String hexString) {
         if (hexString.length() % 2 == 1) {
             throw new IllegalArgumentException("Invalid hexadecimal String supplied.");
         }
@@ -40,7 +42,7 @@ class Converting {
         return bytes;
     }
 
-    static byte[] intArrayToByte(int[] intArray, int length) {
+    public static byte[] intArrayToByte(int[] intArray, int length) {
         byte[] res = new byte[length];
         for (int i = 0; i < length; i++) {
             res[i] = (byte) ((intArray[i / 4] >>> (i % 4) * 8) & 0xff);
@@ -48,7 +50,7 @@ class Converting {
         return res;
     }
 
-    static int[] byteArrayToInt(byte[] byteArray, int length) {
+    public static int[] byteArrayToInt(byte[] byteArray, int length) {
         int[] res = new int[length];
         for (int j = 0; j < res.length; j++) {
             res[j] = 0;
@@ -63,7 +65,7 @@ class Converting {
         return res;
     }
 
-    static int[] byteArrayToWords(byte[] key, int c) {
+    public static int[] byteArrayToWords(byte[] key, int c) {
         int[] tmp = new int[c];
         for (int i = 0; i < tmp.length; i++)
             tmp[i] = 0;
