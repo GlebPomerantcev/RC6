@@ -1,3 +1,7 @@
+
+import utility.ConvertingUtility;
+import utility.RotateUtility;
+
 import java.io.*;
 
 public class Main {
@@ -14,29 +18,25 @@ public class Main {
             BufferedReader bf = new BufferedReader(input);
 
             String operationType = bf.readLine();
+            String inputText = bf.readLine().replaceAll(" ", "");
+            String inputKey = bf.readLine().replaceAll(" ", "");
+
+            byte[] text = ConvertingUtility.hexToByteArray(inputText);
+            byte[] key = ConvertingUtility.hexToByteArray(inputKey);
+
+            S = keySchedule(key);
+
             switch (operationType) {
                 case "encryption": {
-                    String inputText = bf.readLine().replaceAll(" ", "");
-                    String inputKey = bf.readLine().replaceAll(" ", "");
-                    byte[] W = Converting.hexToByteArray(inputText);
-                    byte[] key = Converting.hexToByteArray(inputKey);
-                    S = keySchedule(key);
-
-                    byte[] resArr = encryption(W);
-                    String resString = Converting.byteArrayToHex(resArr).replaceAll("..", "$0 ");
+                    byte[] resArr = encryption(text);
+                    String resString = ConvertingUtility.byteArrayToHex(resArr).replaceAll("..", "$0 ");
                     output.write("result is: " + resString);
                     output.flush();
                     break;
                 }
                 case "decryption": {
-                    String inputText = bf.readLine().replaceAll(" ", "");
-                    String inputKey = bf.readLine().replaceAll(" ", "");
-                    byte[] X = Converting.hexToByteArray(inputText);
-                    byte[] key = Converting.hexToByteArray(inputKey);
-                    S = keySchedule(key);
-
-                    byte[] resArr = decryption(X);
-                    String resString = Converting.byteArrayToHex(resArr).replaceAll("..", "$0 ");
+                    byte[] resArr = decryption(text);
+                    String resString = ConvertingUtility.byteArrayToHex(resArr).replaceAll("..", "$0 ");
                     output.write("result is: " + resString);
                     output.flush();
                     break;
@@ -50,21 +50,13 @@ public class Main {
         }
     }
 
-    private static int rotLeft(int val, int pas) {
-        return (val << pas) | (val >>> (32 - pas));
-    }
-
-    private static int rotRight(int val, int pas) {
-        return (val >>> pas) | (val << (32 - pas));
-    }
-
     private static byte[] encryption(byte[] key) {
         int temp, t, u, lgw = 5;
         byte[] res;
         int[] data = new int[key.length / 4];
         for (int i = 0; i < data.length; i++)
             data[i] = 0;
-        data = Converting.byteArrayToInt(key, data.length);
+        data = ConvertingUtility.byteArrayToInt(key, data.length);
 
         int A = data[0], B = data[1], C = data[2], D = data[3];
 
@@ -72,10 +64,10 @@ public class Main {
         D += S[1];
 
         for (int i = 1; i <= r; i++) {
-            t = rotLeft(B * (2 * B + 1), lgw);
-            u = rotLeft(D * (2 * D + 1), lgw);
-            A = rotLeft(A ^ t, u) + S[2 * i];
-            C = rotLeft(C ^ u, t) + S[2 * i + 1];
+            t = RotateUtility.rotLeft(B * (2 * B + 1), lgw);
+            u = RotateUtility.rotLeft(D * (2 * D + 1), lgw);
+            A = RotateUtility.rotLeft(A ^ t, u) + S[2 * i];
+            C = RotateUtility.rotLeft(C ^ u, t) + S[2 * i + 1];
 
             temp = A;
             A = B;
@@ -91,7 +83,7 @@ public class Main {
         data[2] = C;
         data[3] = D;
 
-        res = Converting.intArrayToByte(data, key.length);
+        res = ConvertingUtility.intArrayToByte(data, key.length);
         return res;
     }
 
@@ -100,7 +92,7 @@ public class Main {
         int[] data = new int[input.length / 4];
         for (int i = 0; i < data.length; i++)
             data[i] = 0;
-        data = Converting.byteArrayToInt(input, data.length);
+        data = ConvertingUtility.byteArrayToInt(input, data.length);
 
         int A = data[0], B = data[1], C = data[2], D = data[3];
 
@@ -115,10 +107,10 @@ public class Main {
             B = A;
             A = temp;
 
-            u = rotLeft(D * (2 * D + 1), lgw);
-            t = rotLeft(B * (2 * B + 1), lgw);
-            C = rotRight(C - S[2 * i + 1], t) ^ u;
-            A = rotRight(A - S[2 * i], u) ^ t;
+            u = RotateUtility.rotLeft(D * (2 * D + 1), lgw);
+            t = RotateUtility.rotLeft(B * (2 * B + 1), lgw);
+            C = RotateUtility.rotRight(C - S[2 * i + 1], t) ^ u;
+            A = RotateUtility.rotRight(A - S[2 * i], u) ^ t;
 
         }
         D = D - S[1];
@@ -129,7 +121,7 @@ public class Main {
         data[2] = C;
         data[3] = D;
 
-        res = Converting.intArrayToByte(data, input.length);
+        res = ConvertingUtility.intArrayToByte(data, input.length);
         return res;
     }
 
@@ -137,7 +129,7 @@ public class Main {
         int[] S = new int[2 * r + 4];
         S[0] = Pw;
         int c = key.length / (w / 8);
-        int[] L = Converting.byteArrayToWords(key, c);
+        int[] L = ConvertingUtility.byteArrayToWords(key, c);
 
         for (int i = 1; i < (2 * r + 4); i++) {
             S[i] = S[i - 1] + Qw;
@@ -148,8 +140,8 @@ public class Main {
         A = B = i = j = 0;
 
         for (int s = 0; s < v; s++) {
-            A = S[i] = rotLeft((S[i] + A + B), 3);
-            B = L[j] = rotLeft(L[j] + A + B, A + B);
+            A = S[i] = RotateUtility.rotLeft((S[i] + A + B), 3);
+            B = L[j] = RotateUtility.rotLeft(L[j] + A + B, A + B);
             i = (i + 1) % (2 * r + 4);
             j = (j + 1) % c;
         }
